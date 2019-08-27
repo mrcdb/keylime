@@ -415,14 +415,14 @@ directory, unless IPsec configuration is being used (see [Additional Reading](#a
 ## Systemd service support
 
 The directory `services/` includes `systemd` service files for the verifier,
-agent and registrar.
+agent, registrar and webapp.
 
 You can install the services with the following command:
 
 `sudo ./services/install.sh`
 
 Once installed, you can run and inspect the services `keylime_verifier`,
-`keylime_agent` and `keylime_registrar` via `systemctl`.
+`keylime_agent`, `keylime_registrar` and `keylime_webapp` via `systemctl`.
 
 ## Report a Security Vulnerability
 

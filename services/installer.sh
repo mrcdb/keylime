@@ -20,14 +20,17 @@ echo "Using keylime scripts directory: ${KEYLIMEDIR}"
 sed "s|KEYLIMEDIR|$KEYLIMEDIR|g" $BASEDIR/keylime_agent.service.example > /etc/systemd/system/keylime_agent.service
 sed "s|KEYLIMEDIR|$KEYLIMEDIR|g" $BASEDIR/keylime_registrar.service.example > /etc/systemd/system/keylime_registrar.service
 sed "s|KEYLIMEDIR|$KEYLIMEDIR|g" $BASEDIR/keylime_verifier.service.example > /etc/systemd/system/keylime_verifier.service
+sed "s|KEYLIMEDIR|$KEYLIMEDIR|g" $BASEDIR/keylime_webapp.service.example > /etc/systemd/system/keylime_webapp.service
 
 # set permissions
 chmod 664 /etc/systemd/system/keylime_agent.service
 chmod 664 /etc/systemd/system/keylime_registrar.service
 chmod 664 /etc/systemd/system/keylime_verifier.service
+chmod 664 /etc/systemd/system/keylime_webapp.service
 
 # enable at startup
 systemctl enable keylime_agent.service
 systemctl enable keylime_registrar.service
 systemctl enable keylime_verifier.service
+systemctl enable keylime_webapp.service
 

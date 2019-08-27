@@ -1,0 +1,9 @@
+[Unit]
+Wants=keylime_verifier.service keylime_registrar.service keylime_agent.service
+After=network.target keylime_verifier.service keylime_registrar.service keylime_agent.service
+
+[Service]
+ExecStart=KEYLIMEDIR/keylime_webapp
+
+[Install]
+WantedBy=default.target
