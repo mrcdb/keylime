@@ -23,7 +23,6 @@ let API_VERSION=2;
 let MAX_TERM_LEN=100;
 let DEBUG=false;
 let gTerminalOffset=0;
-let gCVTerminalOffset=0;
 
 
 // Report that error occurred
@@ -421,7 +420,7 @@ function populateAgents() {
     });
 }
 // CV log "terminal" window functions: append-to and update (periodic)
-function appendToCVTerminal(logLines) {
+function refreshCVTerminal(logLines) {
     if (typeof(logLines) === 'undefined') {
         return;
     }
@@ -436,7 +435,6 @@ function appendToCVTerminal(logLines) {
 
     // Add each new log line to the CV terminal
     for (let i = 0; i < logLines.length; i++) {
-        gCVTerminalOffset++; // remember new offset for next request (append logs)
         term.innerHTML += "<div>" + logLines[i] + "</div>";
     }
 
@@ -493,7 +491,7 @@ function updateTerminal() {
     });
 }
 function updateCVTerminal() {
-    asyncRequest("GET", "logs", "cv?pos="+gCVTerminalOffset, undefined, function(responseText){
+    asyncRequest("GET", "logs", "cv", undefined, function(responseText){
         let json = JSON.parse(responseText);
 
         // Ensure response packet isn't malformed
@@ -510,12 +508,12 @@ function updateCVTerminal() {
         }
 
         if (response["log"].length == 0) {
-            // nothing new, don't bother!
+            // empty response, leave last log
             return;
         }
 
         // update terminal display to user
-        appendToCVTerminal(response["log"]);
+        refreshCVTerminal(response["log"]);
     });
 }
 // Attach dragging capabilities for payload upload functionality
@@ -532,5 +530,5 @@ window.onload = function(e) {
     setInterval(populateAgents, 2000);
     setInterval(updateAgentsInfo, 750);
     setInterval(updateTerminal, 1000);
-    setInterval(updateCVTerminal, 1500);
+    setInterval(updateCVTerminal, 3000);
 }

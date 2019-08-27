@@ -300,13 +300,11 @@ class CloudVerifierHandler(BaseHandler):
             return
         
         if "logs" in rest_params and rest_params["logs"] == "cv":
-            offset = 0
-            if "pos" in rest_params and rest_params["pos"] is not None and rest_params["pos"].isdigit():
-                offset = int(rest_params["pos"])
             # intercept requests for logs
             with open(keylime_logging.LOGCV,'r') as f:
                 logValue = f.readlines()
-                common.echo_json_response(self, 200, "Success", {'log':logValue[offset:]})
+                # return only last 100 lines
+                common.echo_json_response(self, 200, "Success", {'log':logValue[-100:]})
             return
         elif "cv" not in rest_params:
             # otherwise they must be looking for agent info
