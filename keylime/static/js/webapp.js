@@ -23,6 +23,7 @@ let API_VERSION=2;
 let MAX_TERM_LEN=100;
 let DEBUG=false;
 let gTerminalOffset=0;
+let gCVTerminalOffset=0;
 
 
 // Report that error occurred
@@ -419,7 +420,29 @@ function populateAgents() {
         }
     });
 }
+// CV log "terminal" window functions: append-to and update (periodic)
+function appendToCVTerminal(logLines) {
+    if (typeof(logLines) === 'undefined') {
+        return;
+    }
 
+    // Get the CV terminal agent
+    let term = document.getElementById('terminal-cv');
+
+    // Keep list at MAX_TERM_LEN items (prune)
+    while (term.firstChild && (term.childElementCount+logLines.length) > MAX_TERM_LEN) {
+        term.removeChild(term.firstChild);
+    }
+
+    // Add each new log line to the CV terminal
+    for (let i = 0; i < logLines.length; i++) {
+        gCVTerminalOffset++; // remember new offset for next request (append logs)
+        term.innerHTML += "<div>" + logLines[i] + "</div>";
+    }
+
+    // Scroll so newest are in view
+    term.scrollTop = term.scrollHeight - term.clientHeight;
+}
 // Tenant log "terminal" window functions: append-to and update (periodic)
 function appendToTerminal(logLines) {
     if (typeof(logLines) === 'undefined') {
@@ -469,7 +492,32 @@ function updateTerminal() {
         appendToTerminal(response["log"]);
     });
 }
+function updateCVTerminal() {
+    asyncRequest("GET", "logs", "cv?pos="+gCVTerminalOffset, undefined, function(responseText){
+        let json = JSON.parse(responseText);
 
+        // Ensure response packet isn't malformed
+        if (!("results" in json)) {
+            reportIssue("ERROR updateCVTerminal: Malformed response for log refresh callback!");
+            return;
+        }
+        let response = json["results"];
+
+        // Figure out which agent id we refer to
+        if (!("log" in response)) {
+            reportIssue("ERROR updateCVTerminal: Cannot get log data from callback!");
+            return;
+        }
+
+        if (response["log"].length == 0) {
+            // nothing new, don't bother!
+            return;
+        }
+
+        // update terminal display to user
+        appendToCVTerminal(response["log"]);
+    });
+}
 // Attach dragging capabilities for payload upload functionality
 window.onload = function(e) {
     // Add agent drag-drop functionality
@@ -484,4 +532,5 @@ window.onload = function(e) {
     setInterval(populateAgents, 2000);
     setInterval(updateAgentsInfo, 750);
     setInterval(updateTerminal, 1000);
+    setInterval(updateCVTerminal, 1500);
 }

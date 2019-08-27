@@ -37,8 +37,10 @@ LOG_TO_STREAM=['tenant_webapp']
 LOGDIR='/var/log/keylime'
 if not common.REQUIRE_ROOT:
     LOGSTREAM = './keylime-stream.log'
+    LOGCV = './cloudverifier.log'
 else:
     LOGSTREAM=LOGDIR+'/keylime-stream.log'
+    LOGCV=LOGDIR+'/cloudverifier.log'
 
 logging.config.fileConfig(common.CONFIG_FILE)
 def init_logging(loggername):

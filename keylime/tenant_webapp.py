@@ -272,12 +272,47 @@ class WebAppHandler(BaseHandler):
                             <div id="terminal-header" onmousedown="toggleVisibility('terminal')">Tenant Logs</div>
                             <div id="terminal"></div>
                         </div>
+                        <div id="terminal-frame">
+                            <div id="terminal-header" onmousedown="toggleVisibility('terminal-cv')">Cloud Verifier Logs</div>
+                            <div id="terminal-cv"></div>
+                        </div>
                     </div>
                 </body>
             </html>
             """
         )
+
+class CloudVerifierHandler(BaseHandler):       
+    def head(self):
+        """HEAD not supported"""
+        common.echo_json_response(self, 405, "HEAD not supported")
+    
+    def get(self):
+        """This method handles the GET requests to retrieve status on agents from the WebApp. 
         
+        Currently, only the web app is available for GETing, i.e. /agents. All other GET uri's 
+        will return errors. 
+        """
+        
+        rest_params = common.get_restful_params(self.request.uri)
+        if rest_params is None:
+            common.echo_json_response(self, 405, "Not Implemented: Use /agents/ or /logs/ interface")
+            return
+        
+        if "logs" in rest_params and rest_params["logs"] == "cv":
+            offset = 0
+            if "pos" in rest_params and rest_params["pos"] is not None and rest_params["pos"].isdigit():
+                offset = int(rest_params["pos"])
+            # intercept requests for logs
+            with open(keylime_logging.LOGCV,'r') as f:
+                logValue = f.readlines()
+                common.echo_json_response(self, 200, "Success", {'log':logValue[offset:]})
+            return
+        elif "cv" not in rest_params:
+            # otherwise they must be looking for agent info
+            common.echo_json_response(self, 400, "uri not supported")
+            logger.warning('GET returning 400 response. uri not supported: ' + self.request.path)
+            return    
 
 class AgentsHandler(BaseHandler):       
     def head(self):
@@ -611,6 +646,7 @@ def main(argv=sys.argv):
     app = tornado.web.Application([
         (r"/webapp/.*", WebAppHandler),
         (r"/(?:v[0-9]/)?agents/.*", AgentsHandler),
+        (r"/(?:v[0-9]/)?logs/cv", CloudVerifierHandler),
         (r"/(?:v[0-9]/)?logs/.*", AgentsHandler),
         (r'/static/(.*)', tornado.web.StaticFileHandler, {'path': root_dir+"/static/"}),
         (r".*", MainHandler),
